@@ -6,7 +6,7 @@ function App() {
   return (
     <div className="App">
       <Files />
-      <div className='uploader-container-app h-screen flex justify-center items-center'>
+      <div className='uploader-container-app flex justify-center items-center h-screen'>
         <Uploader />
       </div>
     </div>
