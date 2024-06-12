@@ -1,8 +1,22 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import classNames from 'classnames';
 import uploadImg from './assets/upload.png'
 
 function Uploader() {
+    const fileInputRef = useRef(null)
+
+    const handleDivClick = () => {
+        fileInputRef.current.click()
+    }
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0]
+
+        if (file) {
+            console.log("Selected file: ", file);
+        }
+    }
+
     const uploaderClasses = classNames(
         'uploader-container',
         'h-3/4',
@@ -20,8 +34,14 @@ function Uploader() {
     );
 
     return (
-        <div className={uploaderClasses}>
-            <img src={uploadImg} className='h-10 w-10'></img>
+        <div className={uploaderClasses} onClick={handleDivClick}>
+            <img src={uploadImg} className='h-10 w-10' alt='upload-icon'></img>
+            <input
+                type='file'
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                onChange={handleFileChange}
+            />
         </div>
     );
 }
