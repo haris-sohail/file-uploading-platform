@@ -1,9 +1,14 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import closeImg from './assets/close.png'
+import { useSelector } from 'react-redux'
 
 function Files() {
     const [isFilesOpen, setIsFilesOpen] = useState(false)
-    const [files, setFiles] = useState([])
+    const files = useSelector((state) => state.file?.files || []);
+
+    useEffect(() => {
+        console.log("Files changed:", files);
+    }, [files]);
 
     return (
         <div className={`files-container absolute h-full w-48 transition duration-700 ${isFilesOpen ? 'bg-blue-100' : ''}`}>
@@ -13,7 +18,7 @@ function Files() {
                     className='border-2 border-blue-500 rounded-xl px-4 py-2 mx-4 my-4 hover:bg-blue-100 transition'
                     onClick={() => setIsFilesOpen(true)}
                 >
-                    <h6>FILES</h6>
+                    FILES
                 </button>
             )}
 

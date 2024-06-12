@@ -1,9 +1,12 @@
 import React, { useRef } from 'react';
 import classNames from 'classnames';
 import uploadImg from './assets/upload.png'
+import { useDispatch } from 'react-redux';
+import { pushFile } from './fileSlice';
 
 function Uploader() {
     const fileInputRef = useRef(null)
+    const dispatch = useDispatch()
 
     const handleDivClick = () => {
         fileInputRef.current.click()
@@ -13,8 +16,18 @@ function Uploader() {
         const file = e.target.files[0]
 
         if (file) {
-            console.log("Selected file: ", file);
+            const fileMetaData = {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                lastModified: file.lastModified
+            }
+
+            dispatch(pushFile(fileMetaData))
+
+            // optionally we can upload to server from here ...
         }
+
     }
 
     const uploaderClasses = classNames(
