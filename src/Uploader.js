@@ -25,6 +25,8 @@ function Uploader() {
 
             dispatch(pushFile(fileMetaData))
 
+            // store this file on the HDD
+
             // optionally we can upload to server from here ...
         }
 

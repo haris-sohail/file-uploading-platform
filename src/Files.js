@@ -20,7 +20,6 @@ function Files() {
             ));
 
             setFilesComp(filesComponent);
-            console.log('set files comp')
         }
     }, [files]);
 

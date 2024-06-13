@@ -9,9 +9,7 @@ const fileSlice = createSlice({
     initialState,
     reducers: {
         pushFile: (state, action) => {
-            console.log("Action payload: ", action.payload);
             state.files.push(action.payload)
-            console.log("Updated State:", [...state.files]);
         }
     }
 })
