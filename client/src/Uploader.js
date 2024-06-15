@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import uploadImg from './assets/upload.png'
 import { useDispatch } from 'react-redux';
 import { pushFile } from './fileSlice';
+import axios from 'axios'
 
 function Uploader() {
     const fileInputRef = useRef(null)
@@ -10,6 +11,25 @@ function Uploader() {
 
     const handleDivClick = () => {
         fileInputRef.current.click()
+    }
+
+    const storeOnHDD = (file) => {
+        const formData = new FormData()
+
+        console.log(file)
+        formData.append('file', file)
+
+        axios.post('http://localhost:5000/storeOnHDD', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+            .then(res => {
+                console.log(res.data)
+            })
+            .catch((err) => {
+                console.log(err)
+            })
     }
 
     const handleFileChange = (e) => {
@@ -26,6 +46,8 @@ function Uploader() {
             dispatch(pushFile(fileMetaData))
 
             // store this file on the HDD
+
+            storeOnHDD(file)
 
             // optionally we can upload to server from here ...
         }

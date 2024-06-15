@@ -3,13 +3,13 @@ import Uploader from './Uploader';
 import Files from './Files';
 import { Provider } from 'react-redux';
 import store from './store';
-import getFilesLocally from './getFilesLocally';
+import LocalFileHandler from './LocalFileHandler';
 
 function App() {
   return (
     <Provider store={store}>
       <div className="App">
-        <getFilesLocally />
+        <LocalFileHandler />
         <Files />
         <div className='uploader-container-app flex justify-center items-center h-screen'>
           <Uploader />
