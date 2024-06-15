@@ -4,6 +4,7 @@ import uploadImg from './assets/upload.png'
 import { useDispatch } from 'react-redux';
 import { pushFile } from './fileSlice';
 import axios from 'axios'
+import toast from 'react-hot-toast';
 
 function Uploader() {
     const fileInputRef = useRef(null)
@@ -49,6 +50,7 @@ function Uploader() {
 
             storeOnHDD(file)
 
+            toast.success("File uploaded")
             // optionally we can upload to server from here ...
         }
 
