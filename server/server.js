@@ -3,6 +3,7 @@ const cors = require('cors')
 const multer = require('multer')
 const path = require('path')
 const fs = require('fs')
+const mime = require('mime-types');
 
 const app = express();
 app.use(cors())
@@ -27,7 +28,7 @@ const storage = multer.diskStorage({
         cb(null, uploadPath)
     },
     filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
+        cb(null, file.originalname);
     }
 })
 
@@ -43,6 +44,46 @@ app.post('/storeOnHDD', upload.single('file'), (req, res) => {
         file: req.file,
     });
 })
+
+
+const getAllFilesMetadataFromDirectory = (dirPath, arrayOfFiles) => {
+    const files = fs.readdirSync(dirPath);
+
+    arrayOfFiles = arrayOfFiles || [];
+
+    files.forEach((file) => {
+        const filePath = path.join(dirPath, file);
+        const stats = fs.statSync(filePath);
+
+        if (stats.isDirectory()) {
+            arrayOfFiles = getAllFilesMetadataFromDirectory(filePath, arrayOfFiles);
+        } else {
+            arrayOfFiles.push({
+                name: file,
+                type: mime.lookup(filePath) || 'unknown',
+                size: stats.size,
+            });
+        }
+    });
+
+    return arrayOfFiles;
+};
+
+app.get('/getAllFilesFromHDD', (req, res) => {
+    try {
+        const uploadBasePath = path.join(__dirname, 'uploads');
+        const filesMetadata = getAllFilesMetadataFromDirectory(uploadBasePath);
+
+        res.status(200).send({
+            files: filesMetadata,
+        });
+    } catch (err) {
+        res.status(500).send({
+            message: 'Failed to retrieve files metadata',
+            error: err.message,
+        });
+    }
+});
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
