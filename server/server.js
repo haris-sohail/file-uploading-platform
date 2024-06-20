@@ -1,89 +1,56 @@
 const express = require('express')
 const cors = require('cors')
-const multer = require('multer')
-const path = require('path')
-const fs = require('fs')
 const mime = require('mime-types');
+const mongoose = require('mongoose');
+const multer = require('multer');
+const bodyParser = require('body-parser');
+const FileModel = require('./Models/Files');
 
 const app = express();
 app.use(cors())
 app.use(express.json())
+app.use(bodyParser.json());
 
-// create a directory if it doesn't already exists using the file system module
-const createDirIfNotExists = (dir) => {
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true })
-    }
-}
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-// set storage engine for multer
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const fileType = file.mimetype.split('/')[0];
-        const folderName = `${fileType}-folder`;
-        const uploadPath = path.join(__dirname, 'uploads', folderName);
-
-        createDirIfNotExists(uploadPath)
-
-        cb(null, uploadPath)
-    },
-    filename: (req, file, cb) => {
-        cb(null, file.originalname);
-    }
-})
-
-const upload = multer({ storage: storage })
-
-app.post('/storeOnHDD', upload.single('file'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).send('File upload failed');
-    }
-
-    res.status(200).send({
-        message: 'File uploaded successfully',
-        file: req.file,
-    });
-})
+mongoose.connect('mongodb://localhost:27017/FileUp');
 
 
-const getAllFilesMetadataFromDirectory = (dirPath, arrayOfFiles) => {
-    const files = fs.readdirSync(dirPath);
-
-    arrayOfFiles = arrayOfFiles || [];
-
-    files.forEach((file) => {
-        const filePath = path.join(dirPath, file);
-        const stats = fs.statSync(filePath);
-
-        if (stats.isDirectory()) {
-            arrayOfFiles = getAllFilesMetadataFromDirectory(filePath, arrayOfFiles);
-        } else {
-            arrayOfFiles.push({
-                name: file,
-                type: mime.lookup(filePath) || 'unknown',
-                size: stats.size,
-            });
-        }
+const createFileModel = (fileType) => {
+    const dynamicSchema = new mongoose.Schema({
+        id: String,
+        fileName: String,
+        fileType: String
     });
 
-    return arrayOfFiles;
+    return mongoose.model(fileType, dynamicSchema, fileType);
 };
 
-app.get('/getAllFilesFromHDD', (req, res) => {
-    try {
-        const uploadBasePath = path.join(__dirname, 'uploads');
-        const filesMetadata = getAllFilesMetadataFromDirectory(uploadBasePath);
+app.post('/uploadFileDB', upload.single('file'), (req, res) => {
+    const file = req.file
 
-        res.status(200).send({
-            files: filesMetadata,
-        });
-    } catch (err) {
-        res.status(500).send({
-            message: 'Failed to retrieve files metadata',
-            error: err.message,
-        });
+    const fileType = file.mimetype.split('/')[0];
+
+
+    // Check if model for this fileType already exists, else create it
+    let DynamicFileModel;
+    try {
+        DynamicFileModel = mongoose.model(fileType);
+    } catch (error) {
+        DynamicFileModel = createFileModel(fileType);
     }
-});
+
+    const newFile = new DynamicFileModel({
+        fileName: file.originalname,
+        fileType: fileType
+    });
+
+    newFile.save()
+        .then(() => res.send('File uploaded and stored successfully.'))
+        .catch(err => res.send('Error storing file: ' + err.message));
+})
+
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

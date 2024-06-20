@@ -1,40 +1,21 @@
 import React, { useRef } from 'react';
 import classNames from 'classnames';
-import uploadImg from './assets/upload.png'
+import uploadImg from './assets/upload.png';
 import { useDispatch } from 'react-redux';
 import { pushFile } from './fileSlice';
-import axios from 'axios'
+import axios from 'axios';
 import toast from 'react-hot-toast';
 
 function Uploader() {
-    const fileInputRef = useRef(null)
-    const dispatch = useDispatch()
+    const fileInputRef = useRef(null);
+    const dispatch = useDispatch();
 
     const handleDivClick = () => {
-        fileInputRef.current.click()
-    }
-
-    const storeOnHDD = (file) => {
-        const formData = new FormData()
-
-        console.log(file)
-        formData.append('file', file)
-
-        axios.post('http://localhost:5000/storeOnHDD', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        })
-            .then(res => {
-                console.log(res.data)
-            })
-            .catch((err) => {
-                console.log(err)
-            })
-    }
+        fileInputRef.current.click();
+    };
 
     const handleFileChange = (e) => {
-        const file = e.target.files[0]
+        const file = e.target.files[0];
 
         if (file) {
             const fileMetaData = {
@@ -42,19 +23,30 @@ function Uploader() {
                 size: file.size,
                 type: file.type,
                 lastModified: file.lastModified
-            }
+            };
 
-            dispatch(pushFile(fileMetaData))
+            dispatch(pushFile(fileMetaData));
 
-            // store this file on the HDD
+            // Upload file to DB
+            const formData = new FormData();
+            formData.append('file', file);
 
-            storeOnHDD(file)
-
-            toast.success("File uploaded")
-            // optionally we can upload to server from here ...
+            axios.post('http://localhost:5000/uploadFileDB', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            })
+                .then(res => {
+                    if (res.data) {
+                        toast.success("Uploaded successfully");
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                    toast.error("Error uploading file to server, unreachable");
+                });
         }
-
-    }
+    };
 
     const uploaderClasses = classNames(
         'uploader-container',
@@ -74,7 +66,7 @@ function Uploader() {
 
     return (
         <div className={uploaderClasses} onClick={handleDivClick}>
-            <img src={uploadImg} className='h-10 w-10' alt='upload-icon'></img>
+            <img src={uploadImg} className='h-10 w-10' alt='upload-icon' />
             <input
                 type='file'
                 ref={fileInputRef}

@@ -11,21 +11,8 @@ function LocalFileHandler() {
     if (!useEffectCalled) {
       useEffectCalled = true
 
-      axios.get('http://localhost:5000/getAllFilesFromHDD')
-        .then(res => {
-          if (res.data) {
-            const files = res.data.files;
-
-            // set all files in the redux store
-
-            files.forEach(file => {
-              dispatch(pushFile(file))
-            })
-          }
-        })
-        .catch(err => {
-          console.log(err)
-        })
+      // get the files from the db
+      
     }
 
   }, [])
