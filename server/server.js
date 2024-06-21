@@ -76,6 +76,9 @@ app.get('/getFiles', async (req, res) => {
     }
 });
 
+const userRoutes = require('./routes/userRoutes');
+app.use('/user', userRoutes);
+
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
