@@ -1,29 +1,52 @@
 const express = require('express');
-const UserModel = require("../Models/User");
+const bcrypt = require('bcrypt');
+const UserModel = require('../Models/User');
 const router = express.Router();
 
-router.post('/register', (req, res) => {
-  UserModel.create(req.body)
-    .then(users => res.json(users))
-    .catch(err => res.json(err))
+router.post('/register', async (req, res) => {
+  try {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const user = new UserModel({
+      username: req.body.username,
+      email: req.body.email,
+      password: hashedPassword,
+    });
+    const savedUser = await user.save();
+    res.json(savedUser);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/getUser', (req, res) => {
-  UserModel.findOne({ username: req.body.username })
-    .then(user => res.json(user))
-    .catch(err => res.json(err))
+router.post('/getUser', async (req, res) => {
+  try {
+    const user = await UserModel.findOne({ username: req.body.username });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/getEmail', (req, res) => {
-  UserModel.findOne({ email: req.body.email })
-    .then(email => res.json(email))
-    .catch(err => res.json(err))
+router.post('/getEmail', async (req, res) => {
+  try {
+    const user = await UserModel.findOne({ email: req.body.email });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/login', (req, res) => {
-  UserModel.findOne({ username: req.body.username, password: req.body.password })
-    .then(user => res.json(user))
-    .catch(err => res.json(err))
+router.post('/login', async (req, res) => {
+  try {
+    const user = await UserModel.findOne({ username: req.body.username });
+    if (user && await bcrypt.compare(req.body.password, user.password)) {
+      res.json(user);
+    } else {
+      res.status(401).json({ message: 'Invalid username or password' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
