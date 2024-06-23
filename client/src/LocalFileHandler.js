@@ -3,7 +3,7 @@ import { pushFile } from './fileSlice';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
 
-function LocalFileHandler() {
+function LocalFileHandler({ username }) {
   const dispatch = useDispatch()
   let useEffectCalled = false;
 
@@ -12,9 +12,10 @@ function LocalFileHandler() {
       useEffectCalled = true
 
       // get the files from the db
-      axios.get('http://localhost:5000/getFiles')
+      axios.get('http://localhost:5000/getFiles', { params: { username } })
         .then(res => {
           if (res.data) {
+            console.log(res.data)
             res.data.forEach(file => {
               const temp_file = {
                 name: file.fileName,

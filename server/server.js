@@ -27,7 +27,8 @@ const createFileModel = (fileType) => {
     const dynamicSchema = new mongoose.Schema({
         fileName: String,
         fileType: String,
-        fileSize: Number
+        fileSize: Number,
+        username: String
     });
 
     return mongoose.model(fileType, dynamicSchema, fileType);
@@ -37,6 +38,8 @@ app.post('/uploadFileDB', upload.single('file'), (req, res) => {
     const file = req.file
 
     const fileType = file.mimetype.split('/')[0];
+
+    const username = req.body.username;
 
 
     // Check if model for this fileType already exists, else create it
@@ -50,7 +53,8 @@ app.post('/uploadFileDB', upload.single('file'), (req, res) => {
     const newFile = new DynamicFileModel({
         fileName: file.originalname,
         fileType: fileType,
-        fileSize: file.size
+        fileSize: file.size,
+        username: username
     });
 
     newFile.save()
@@ -59,11 +63,16 @@ app.post('/uploadFileDB', upload.single('file'), (req, res) => {
 })
 
 app.get('/getFiles', async (req, res) => {
+    const username = req.query.username;
+    console.log(username)
     try {
         const collections = await mongoose.connection.db.listCollections().toArray();
-        const filePromises = collections.map(collection => {
+        // Filter out the 'users' collection
+        const filteredCollections = collections.filter(collection => collection.name !== 'users');
+        
+        const filePromises = filteredCollections.map(collection => {
             const DynamicFileModel = createFileModel(collection.name);
-            return DynamicFileModel.find({}).exec();
+            return DynamicFileModel.find({ username: username }).exec();
         });
 
         const filesArrays = await Promise.all(filePromises);

@@ -6,7 +6,7 @@ import { pushFile } from './fileSlice';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-function Uploader() {
+function Uploader({username}) {
     const fileInputRef = useRef(null);
     const dispatch = useDispatch();
 
@@ -30,6 +30,7 @@ function Uploader() {
             // Upload file to DB
             const formData = new FormData();
             formData.append('file', file);
+            formData.append('username', username);
 
             axios.post('http://localhost:5000/uploadFileDB', formData, {
                 headers: {

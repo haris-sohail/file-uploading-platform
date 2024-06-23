@@ -8,10 +8,6 @@ router.post('/register', (req, res) => {
     .catch(err => res.json(err))
 });
 
-
-
-
-
 router.post('/getUser', (req, res) => {
   UserModel.findOne({ username: req.body.username })
     .then(user => res.json(user))
