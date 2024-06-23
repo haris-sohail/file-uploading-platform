@@ -52,7 +52,7 @@
     margin-top: 2vh;
 }
 
-button {
+.signup-container button {
     border: 2px solid black;
     border-radius: 10px !important;
     width: 9vmax;
@@ -63,7 +63,7 @@ button {
     transition: background-color 0.2s;
 }
 
-button:hover {
+.signup-container button:hover {
     background-color: rgb(100, 100, 255);
 }
 
